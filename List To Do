@@ -1,0 +1,143 @@
+-------------------------
+### Jetson Nano Setup ###
+-------------------------
+1. Install SDK Manager v.1.8 or newer in the master PC
+2. Insert SD_CARD into Jetson Nano (Format SD_CARD as FAT32)
+3. add pin jumper in j48 on the left side of the USB port to disable usb power
+4. Force Jetson Nano into Recovery Mode by add pin jumper in the FRC pin and GND
+5. Turn on Jetson Nano with DC jack 2.5 mm 5 Volt PSU
+6. Connect Jetson Nano with the PC that have been installed with SDK Manager via micro USB Port
+7. Choose Device target in the SDK Manager as Jetson Nano
+8. Install Jetpack 4.6.2 and Cuda 10.2
+9. Choose Manually Setup
+10. Wait until the process is complete
+
+--------------------
+### Upgrade SWAP ###
+--------------------
+1. free -h (showing the active swap size)
+2. sudo fallocate -l 8G /mnt/8GB.swap
+3. sudo chmod 600 /mnt/8GB.swap
+4. sudo mkswap /mnt/8GB.swap
+5. sudo vi /etc/fstab
+   * /mnt/8GB.swap swap swap defaults 0 0 (add this line in the last line of the fstab file)
+6. save and exit
+7. reboot
+
+------------------------------
+### CUDA 10.2 post installation ###
+------------------------------
+1. export PATH=/usr/local/cuda-10.2/bin${PATH:+:${PATH}}
+2. export LD_Library_PATH=/usr/local/cuda-10.2/lib64\
+	>  ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+----------------------
+### Check CUDA GPU ###
+----------------------
+which nvidia-smi
+nvidia-smi
+nvcc --version
+
+---------------------------
+### Install ROS Melodic ###
+---------------------------
+1. Building Dependencies
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt update
+sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+
+2. Install ROS Full Desktop
+sudo apt install ros-melodic-desktop-full
+
+3. Setup Environment
+echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+
+4. Initializing all ros dependencies
+sudo apt install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential
+sudo rosdep init
+rosdep update
+
+--------------------------------------
+### additional python3 ros packages ###
+--------------------------------------
+1. sudo apt-get install python-catkin-pkg
+2. sudo apt-get install python3-catkin-pkg-modules
+3. sudo apt-get install python3-rospkg-modules
+
+-------------------------
+### vim python plugin ###
+-------------------------
+https://linuxhint.com/vim-python-development/
+
+------------------------------------------
+### upgrade python 3 version to >= 3.7 ###
+------------------------------------------
+0. python3 -V
+1. sudo apt update
+2. sudo apt install python3.x (x -> version)
+3. python3.x
+4. exit()
+5. sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.[old version] 1
+6. sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.x 2
+7. sudo update-alternatives --config python3
+8. sudo rm /usr/bin/python3
+9. sudo ln -s python3.x /usr/bin/python3
+10. python3 --version
+
+--------------------------------------
+### Install PC9685 python3 library ###
+--------------------------------------
+1. sudo pip3 install adafruit-circuitpython-pca9685
+2. sudo pip3 install adafruit-circuitpython-servokit
+
+------------------------
+### hokuyo urg_lidar setup ###
+------------------------
+*reference:
+	http://wiki.ros.org/urg_node
+
+clone from github repository at https://github.com/ros-drivers/urg_node
+	roscd
+	cd ../src/
+	git clone https://github.com/ros-drivers/urg_node
+	cd ..
+	catkin_make
+
+*note: if there are some errors while making the package, install some dependencies for urg_node : 
+	1. laser_proc	(sudo apt install ros-melodic-laser-proc)
+	2. urg_c	(sudo apt install ros-melodic-urg-c)
+*how to run:
+	chmod 666 /dev/ttyACM0
+	roslaunch urg_node urg_node
+
+*rviz visualization:
+	rviz
+	add by topic -> /laser
+	set fixed frame into laser
+
+-------------------------
+### hector_slam setup ###
+-------------------------
+*reference: 
+	https://www.youtube.com/watch?v=Qrtz0a7HaQ4
+	http://wiki.ros.org/hector_slam
+
+clone from github repository at https://github.com/tu-darmstadt-ros-pkg/hector_slam
+	roscd
+	cd ../src/
+	git clone https://github.com/tu-darmstadt-ros-pkg/hector_slam
+	cd ..
+	catkin_make
+*Setup:
+	1. open mapping_default.launch at hector_slam/hector_mapping/launch/
+	2. change base_frame and odom_frame parameter value into "base_link"
+	3. at the end of the line add tf static_transfor_publisher node:
+	<node pkg="tf" type="static_transform_publisher" name="base_to_laser_broadcaster" args="0 0 0 0 0 0 base_link laser 100"/>
+	4. open tutorial.launch at hector_slam/hector_slam_launch/launch/
+	5. set use_sim_time param into false (because we use it as a real-time mapping)	
+
+
+
+
+
