@@ -1,0 +1,104 @@
+--------------------
+### Upgrade SWAP ###
+--------------------
+1. free -h (melihat ukuran swap yang sedang aktif)
+2. sudo fallocate -l 8G /mnt/8GB.swap
+3. sudo chmod 600 /mnt/8GB.swap
+4. sudo mkswap /mnt/8GB.swap
+5. sudo vi /etc/fstab
+   * /mnt/8GB.swap swap swap defaults 0 0 (tambahkan pada baris terakhir)
+6. save and exit
+7. reboot
+
+------------------------------
+### CUDA 10.2 post installation ###
+------------------------------
+1. export PATH=/usr/local/cuda-10.2/bin${PATH:+:${PATH}}
+2. export LD_Library_PATH=/usr/local/cuda-10.2/lib64\
+	>  ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+----------------------
+### Check CUDA GPU ###
+----------------------
+which nvidia-smi
+nvidia-smi
+nvcc --version
+
+--------------------------------------
+### additional python3 ros packages ###
+--------------------------------------
+1. sudo apt-get install python-catkin-pkg
+2. sudo apt-get install python3-catkin-pkg-modules
+3. sudo apt-get install python3-rospkg-modules
+
+-------------------------
+### vim python plugin ###
+-------------------------
+https://linuxhint.com/vim-python-development/
+
+------------------------------------------
+### upgrade python 3 version to >= 3.7 ###
+------------------------------------------
+0. python3 -V
+1. sudo apt update
+2. sudo apt install python3.x (x -> version)
+3. python3.x
+4. exit()
+5. sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.[old version] 1
+6. sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.x 2
+7. sudo update-alternatives --config python3
+8. sudo rm /usr/bin/python3
+9. sudo ln -s python3.x /usr/bin/python3
+10. python3 --version
+
+--------------------------------------
+### Install PC9685 python3 library ###
+--------------------------------------
+1. sudo pip3 install adafruit-circuitpython-pca9685
+2. sudo pip3 install adafruit-circuitpython-servokit
+
+------------------------
+### hokuyo urg_lidar setup ###
+------------------------
+clone from github repository at https://github.com/ros-drivers/urg_node
+	roscd
+	cd ../src/
+	git clone https://github.com/ros-drivers/urg_node
+	cd ..
+	catkin_make
+
+*note: if there are some errors while making the package, install some dependencies for urg_node : 
+	1. laser_proc	(sudo apt install ros-melodic-laser-proc)
+	2. urg_c	(sudo apt install ros-melodic-urg-c)
+*how to run:
+	chmod 666 /dev/ttyACM0
+	roslaunch urg_node urg_node
+
+*rviz visualization:
+	rviz
+	add by topic -> /laser
+	set fixed frame into laser
+
+-------------------------
+### hector_slam setup ###
+-------------------------
+*reference: https://www.youtube.com/watch?v=Qrtz0a7HaQ4
+clone from github repository at https://github.com/tu-darmstadt-ros-pkg/hector_slam
+	roscd
+	cd ../src/
+	git clone https://github.com/tu-darmstadt-ros-pkg/hector_slam
+	cd ..
+	catkin_make
+*Setup:
+	1. open mapping_default.launch at hector_slam/hector_mapping/launch/
+	2. change base_frame and odom_frame parameter value into "base_link"
+	3. at the end of the line add tf static_transfor_publisher node:
+	<node pkg="tf" type="static_transform_publisher" name="base_to_laser_broadcaster" args="0 0 0 0 0 0 base_link laser 100"/>
+	4. open tutorial.launch at hector_slam/hector_slam_launch/launch/
+	5. set use_sim_time param into false (because we use it as a real-time mapping)
+	6. run the tutorial.launch 	
+
+
+
+
+

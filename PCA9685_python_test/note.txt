@@ -1,0 +1,7 @@
+Servo:
+degree		direction	Status
+73
+74-85		fw		Stall
+86-91		-		Stop
+92		bw		Stall			
+93		bw		Move		
